@@ -1,6 +1,6 @@
 -- ============================================
--- Delivery Helper v3.0 (Фарм + Определитель координат)
--- Сворачиваемое окно, две вкладки, работа на телефоне/ПК
+-- Delivery Helper v3.1 (Фарм + Определитель координат)
+-- ИСПРАВЛЕНО: теперь ищет Box (настоящий груз)
 -- ============================================
 
 local player = game.Players.LocalPlayer
@@ -28,7 +28,7 @@ local title = Instance.new("TextLabel")
 title.Parent = titleBar
 title.Size = UDim2.new(1, -90, 1, 0)
 title.Position = UDim2.new(0, 10, 0, 0)
-title.Text = "Delivery Helper v3.0"
+title.Text = "Delivery Helper v3.1 (Box Farmer)"
 title.TextColor3 = Color3.fromRGB(255, 255, 255)
 title.TextXAlignment = Enum.TextXAlignment.Left
 title.BackgroundTransparency = 1
@@ -77,12 +77,11 @@ farmPanel.Size = UDim2.new(1, -20, 1, -95)
 farmPanel.Position = UDim2.new(0, 10, 0, 80)
 farmPanel.BackgroundColor3 = Color3.fromRGB(30, 30, 40)
 farmPanel.ScrollBarThickness = 6
-farmPanel.CanvasSize = UDim2.new(0, 0, 0, 500)
+farmPanel.CanvasSize = UDim2.new(0, 0, 0, 550)
 
--- Настройки фарма
 local farmSettings = Instance.new("Frame")
 farmSettings.Parent = farmPanel
-farmSettings.Size = UDim2.new(1, 0, 0, 200)
+farmSettings.Size = UDim2.new(1, 0, 0, 250)
 farmSettings.BackgroundTransparency = 1
 
 local farmTitle = Instance.new("TextLabel")
@@ -91,7 +90,7 @@ farmTitle.Size = UDim2.new(1, 0, 0, 30)
 farmTitle.Text = "⚙️ НАСТРОЙКИ ФАРМА"
 farmTitle.TextSize = 16
 
--- Имя груза
+-- Имя груза (теперь по умолчанию Box!)
 local cargoLabel = Instance.new("TextLabel")
 cargoLabel.Parent = farmSettings
 cargoLabel.Size = UDim2.new(0, 100, 0, 25)
@@ -103,35 +102,45 @@ local cargoInput = Instance.new("TextBox")
 cargoInput.Parent = farmSettings
 cargoInput.Size = UDim2.new(0, 150, 0, 25)
 cargoInput.Position = UDim2.new(0, 120, 0, 40)
-cargoInput.PlaceholderText = "Pick"
-cargoInput.Text = "Pick"
+cargoInput.PlaceholderText = "Box, Pick, Grab..."
+cargoInput.Text = "Box"  -- ← ИСПРАВЛЕНО: теперь Box по умолчанию
+
+-- Подсказка про Box
+local cargoHint = Instance.new("TextLabel")
+cargoHint.Parent = farmSettings
+cargoHint.Size = UDim2.new(0, 280, 0, 20)
+cargoHint.Position = UDim2.new(0, 10, 0, 68)
+cargoHint.Text = "💡 Подсказка: настоящий груз — Box (ящик с дирижабля)"
+cargoHint.TextSize = 11
+cargoHint.TextColor3 = Color3.fromRGB(150, 200, 150)
+cargoHint.BackgroundTransparency = 1
 
 -- Координаты сдачи
 local deliveryLabel = Instance.new("TextLabel")
 deliveryLabel.Parent = farmSettings
 deliveryLabel.Size = UDim2.new(0, 100, 0, 25)
-deliveryLabel.Position = UDim2.new(0, 10, 0, 75)
+deliveryLabel.Position = UDim2.new(0, 10, 0, 95)
 deliveryLabel.Text = "Коорд. сдачи:"
 deliveryLabel.BackgroundTransparency = 1
 
 local deliveryX = Instance.new("TextBox")
 deliveryX.Parent = farmSettings
 deliveryX.Size = UDim2.new(0, 60, 0, 25)
-deliveryX.Position = UDim2.new(0, 120, 0, 75)
+deliveryX.Position = UDim2.new(0, 120, 0, 95)
 deliveryX.PlaceholderText = "X"
 deliveryX.Text = "0"
 
 local deliveryY = Instance.new("TextBox")
 deliveryY.Parent = farmSettings
 deliveryY.Size = UDim2.new(0, 60, 0, 25)
-deliveryY.Position = UDim2.new(0, 185, 0, 75)
+deliveryY.Position = UDim2.new(0, 185, 0, 95)
 deliveryY.PlaceholderText = "Y"
 deliveryY.Text = "3"
 
 local deliveryZ = Instance.new("TextBox")
 deliveryZ.Parent = farmSettings
 deliveryZ.Size = UDim2.new(0, 60, 0, 25)
-deliveryZ.Position = UDim2.new(0, 250, 0, 75)
+deliveryZ.Position = UDim2.new(0, 250, 0, 95)
 deliveryZ.PlaceholderText = "Z"
 deliveryZ.Text = "0"
 
@@ -139,29 +148,30 @@ deliveryZ.Text = "0"
 local radiusLabel = Instance.new("TextLabel")
 radiusLabel.Parent = farmSettings
 radiusLabel.Size = UDim2.new(0, 100, 0, 25)
-radiusLabel.Position = UDim2.new(0, 10, 0, 110)
+radiusLabel.Position = UDim2.new(0, 10, 0, 130)
 radiusLabel.Text = "Радиус поиска:"
 radiusLabel.BackgroundTransparency = 1
 
 local radiusInput = Instance.new("TextBox")
 radiusInput.Parent = farmSettings
 radiusInput.Size = UDim2.new(0, 80, 0, 25)
-radiusInput.Position = UDim2.new(0, 120, 0, 110)
+radiusInput.Position = UDim2.new(0, 120, 0, 130)
 radiusInput.PlaceholderText = "20"
 radiusInput.Text = "20"
 
--- Кнопка Старт/Стоп
+-- Статус
 local farmStatus = Instance.new("TextLabel")
 farmStatus.Parent = farmSettings
-farmStatus.Size = UDim2.new(1, -20, 0, 30)
-farmStatus.Position = UDim2.new(0, 10, 0, 150)
+farmStatus.Size = UDim2.new(1, -20, 0, 40)
+farmStatus.Position = UDim2.new(0, 10, 0, 170)
 farmStatus.Text = "⏹ Остановлен"
 farmStatus.BackgroundColor3 = Color3.fromRGB(60, 60, 70)
 
+-- Кнопка Старт/Стоп
 local farmToggle = Instance.new("TextButton")
 farmToggle.Parent = farmSettings
 farmToggle.Size = UDim2.new(0, 150, 0, 40)
-farmToggle.Position = UDim2.new(0.5, -75, 0, 190)
+farmToggle.Position = UDim2.new(0.5, -75, 0, 220)
 farmToggle.Text = "▶ СТАРТ"
 farmToggle.BackgroundColor3 = Color3.fromRGB(0, 150, 100)
 
@@ -173,7 +183,6 @@ coordPanel.Position = UDim2.new(0, 10, 0, 80)
 coordPanel.BackgroundColor3 = Color3.fromRGB(30, 30, 40)
 coordPanel.Visible = false
 
--- Твои координаты
 local myCoordBox = Instance.new("TextLabel")
 myCoordBox.Parent = coordPanel
 myCoordBox.Size = UDim2.new(1, -20, 0, 60)
@@ -182,7 +191,6 @@ myCoordBox.Text = "📍 Твои координаты:\nX: 0.0  Y: 0.0  Z: 0.0"
 myCoordBox.TextColor3 = Color3.fromRGB(100, 200, 255)
 myCoordBox.BackgroundColor3 = Color3.fromRGB(40, 40, 50)
 
--- Координаты объекта под прицелом
 local targetCoordBox = Instance.new("TextLabel")
 targetCoordBox.Parent = coordPanel
 targetCoordBox.Size = UDim2.new(1, -20, 0, 80)
@@ -191,7 +199,6 @@ targetCoordBox.Text = "🎯 Объект под прицелом:\nНет цел
 targetCoordBox.TextColor3 = Color3.fromRGB(255, 200, 100)
 targetCoordBox.BackgroundColor3 = Color3.fromRGB(40, 40, 50)
 
--- Кнопка записи координат
 local copyBtn = Instance.new("TextButton")
 copyBtn.Parent = coordPanel
 copyBtn.Size = UDim2.new(0, 200, 0, 40)
@@ -199,12 +206,11 @@ copyBtn.Position = UDim2.new(0.5, -100, 0, 180)
 copyBtn.Text = "📋 КОПИРОВАТЬ КООРДИНАТЫ"
 copyBtn.BackgroundColor3 = Color3.fromRGB(0, 150, 200)
 
--- Инструкция
 local coordHint = Instance.new("TextLabel")
 coordHint.Parent = coordPanel
 coordHint.Size = UDim2.new(1, -20, 0, 60)
 coordHint.Position = UDim2.new(0, 10, 0, 240)
-coordHint.Text = "💡 Наведись на объект (груз, точку сдачи) и нажми ЛКМ на телефоне или ПК.\nКоординаты появятся выше."
+coordHint.Text = "💡 Наведись на объект (Box, сундук, точку сдачи) и нажми ЛКМ.\nКоординаты появятся выше → нажми 'Копировать'."
 coordHint.TextSize = 12
 coordHint.TextColor3 = Color3.fromRGB(150, 150, 150)
 coordHint.BackgroundTransparency = 1
@@ -245,6 +251,7 @@ local function findNearestCargo(cargoName, radius, hrp)
     
     for _, obj in ipairs(workspace:GetDescendants()) do
         if obj.Name == cargoName and obj:IsA("BasePart") then
+            -- Проверяем, что груз не привязан к игроку
             local weld = obj:FindFirstChild("WeldConstraint")
             if not weld then
                 local dist = (hrp.Position - obj.Position).Magnitude
@@ -282,14 +289,14 @@ local function startFarming()
     )
     
     if not cargoName or cargoName == "" then
-        farmStatus.Text = "❌ Укажи имя груза!"
+        farmStatus.Text = "❌ Укажи имя груза! (например, Box)"
         return
     end
     
     isFarming = true
     farmToggle.Text = "⏹ СТОП"
     farmToggle.BackgroundColor3 = Color3.fromRGB(200, 50, 50)
-    farmStatus.Text = "🔄 Фарм запущен..."
+    farmStatus.Text = "🔄 Ищу " .. cargoName .. "..."
     
     farmLoop = task.spawn(function()
         while isFarming do
@@ -304,9 +311,9 @@ local function startFarming()
                     hrp.CFrame = CFrame.new(cargo.Position + Vector3.new(0, 2, 0))
                     task.wait(0.2)
                     pressAndHold(0.6)
-                    farmStatus.Text = "📦 Взял груз"
+                    farmStatus.Text = "📦 Взял " .. cargoName
                 else
-                    farmStatus.Text = "🔍 Ищу груз..."
+                    farmStatus.Text = "🔍 Ищу " .. cargoName .. "..."
                 end
             else
                 hrp.CFrame = CFrame.new(deliveryPos)
@@ -434,7 +441,6 @@ end)
 
 updateMyCoordinates()
 setupTargetDetector()
-farmTab.Text = "⚙️ ФАРМ"
-coordTab.Text = "📍 КООРДИНАТЫ"
 
-print("✅ GUI загружен! Используй вкладки для фарма и определения координат.")
+print("✅ GUI v3.1 загружен! Теперь ищу Box (настоящий груз).")
+print("💡 Если хочешь другой объект — поменяй 'Имя груза' на Pick или Grab.")
