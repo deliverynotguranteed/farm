@@ -1,0 +1,440 @@
+-- ============================================
+-- Delivery Helper v3.0 (Фарм + Определитель координат)
+-- Сворачиваемое окно, две вкладки, работа на телефоне/ПК
+-- ============================================
+
+local player = game.Players.LocalPlayer
+local screenGui = Instance.new("ScreenGui")
+screenGui.Name = "DeliveryHelper"
+screenGui.Parent = game.CoreGui
+
+-- ========== ОСНОВНОЕ ОКНО ==========
+local mainFrame = Instance.new("Frame")
+mainFrame.Parent = screenGui
+mainFrame.Size = UDim2.new(0, 420, 0, 520)
+mainFrame.Position = UDim2.new(0.5, -210, 0.5, -260)
+mainFrame.BackgroundColor3 = Color3.fromRGB(25, 25, 35)
+mainFrame.BorderSizePixel = 0
+mainFrame.Active = true
+mainFrame.Draggable = true
+
+-- ========== ЗАГОЛОВОК ==========
+local titleBar = Instance.new("Frame")
+titleBar.Parent = mainFrame
+titleBar.Size = UDim2.new(1, 0, 0, 35)
+titleBar.BackgroundColor3 = Color3.fromRGB(40, 40, 50)
+
+local title = Instance.new("TextLabel")
+title.Parent = titleBar
+title.Size = UDim2.new(1, -90, 1, 0)
+title.Position = UDim2.new(0, 10, 0, 0)
+title.Text = "Delivery Helper v3.0"
+title.TextColor3 = Color3.fromRGB(255, 255, 255)
+title.TextXAlignment = Enum.TextXAlignment.Left
+title.BackgroundTransparency = 1
+
+local closeBtn = Instance.new("TextButton")
+closeBtn.Parent = titleBar
+closeBtn.Size = UDim2.new(0, 30, 1, 0)
+closeBtn.Position = UDim2.new(1, -30, 0, 0)
+closeBtn.Text = "X"
+closeBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+closeBtn.BackgroundColor3 = Color3.fromRGB(200, 50, 50)
+
+local minimizeBtn = Instance.new("TextButton")
+minimizeBtn.Parent = titleBar
+minimizeBtn.Size = UDim2.new(0, 30, 1, 0)
+minimizeBtn.Position = UDim2.new(1, -60, 0, 0)
+minimizeBtn.Text = "_"
+minimizeBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+minimizeBtn.BackgroundColor3 = Color3.fromRGB(60, 60, 70)
+
+-- ========== ВКЛАДКИ ==========
+local tabContainer = Instance.new("Frame")
+tabContainer.Parent = mainFrame
+tabContainer.Size = UDim2.new(1, 0, 0, 40)
+tabContainer.Position = UDim2.new(0, 0, 0, 35)
+tabContainer.BackgroundColor3 = Color3.fromRGB(35, 35, 45)
+
+local farmTab = Instance.new("TextButton")
+farmTab.Parent = tabContainer
+farmTab.Size = UDim2.new(0.5, -1, 1, 0)
+farmTab.Position = UDim2.new(0, 0, 0, 0)
+farmTab.Text = "⚙️ ФАРМ"
+farmTab.BackgroundColor3 = Color3.fromRGB(0, 150, 200)
+
+local coordTab = Instance.new("TextButton")
+coordTab.Parent = tabContainer
+coordTab.Size = UDim2.new(0.5, -1, 1, 0)
+coordTab.Position = UDim2.new(0.5, 1, 0, 0)
+coordTab.Text = "📍 КООРДИНАТЫ"
+coordTab.BackgroundColor3 = Color3.fromRGB(60, 60, 70)
+
+-- ========== ПАНЕЛЬ ФАРМА ==========
+local farmPanel = Instance.new("ScrollingFrame")
+farmPanel.Parent = mainFrame
+farmPanel.Size = UDim2.new(1, -20, 1, -95)
+farmPanel.Position = UDim2.new(0, 10, 0, 80)
+farmPanel.BackgroundColor3 = Color3.fromRGB(30, 30, 40)
+farmPanel.ScrollBarThickness = 6
+farmPanel.CanvasSize = UDim2.new(0, 0, 0, 500)
+
+-- Настройки фарма
+local farmSettings = Instance.new("Frame")
+farmSettings.Parent = farmPanel
+farmSettings.Size = UDim2.new(1, 0, 0, 200)
+farmSettings.BackgroundTransparency = 1
+
+local farmTitle = Instance.new("TextLabel")
+farmTitle.Parent = farmSettings
+farmTitle.Size = UDim2.new(1, 0, 0, 30)
+farmTitle.Text = "⚙️ НАСТРОЙКИ ФАРМА"
+farmTitle.TextSize = 16
+
+-- Имя груза
+local cargoLabel = Instance.new("TextLabel")
+cargoLabel.Parent = farmSettings
+cargoLabel.Size = UDim2.new(0, 100, 0, 25)
+cargoLabel.Position = UDim2.new(0, 10, 0, 40)
+cargoLabel.Text = "Имя груза:"
+cargoLabel.BackgroundTransparency = 1
+
+local cargoInput = Instance.new("TextBox")
+cargoInput.Parent = farmSettings
+cargoInput.Size = UDim2.new(0, 150, 0, 25)
+cargoInput.Position = UDim2.new(0, 120, 0, 40)
+cargoInput.PlaceholderText = "Pick"
+cargoInput.Text = "Pick"
+
+-- Координаты сдачи
+local deliveryLabel = Instance.new("TextLabel")
+deliveryLabel.Parent = farmSettings
+deliveryLabel.Size = UDim2.new(0, 100, 0, 25)
+deliveryLabel.Position = UDim2.new(0, 10, 0, 75)
+deliveryLabel.Text = "Коорд. сдачи:"
+deliveryLabel.BackgroundTransparency = 1
+
+local deliveryX = Instance.new("TextBox")
+deliveryX.Parent = farmSettings
+deliveryX.Size = UDim2.new(0, 60, 0, 25)
+deliveryX.Position = UDim2.new(0, 120, 0, 75)
+deliveryX.PlaceholderText = "X"
+deliveryX.Text = "0"
+
+local deliveryY = Instance.new("TextBox")
+deliveryY.Parent = farmSettings
+deliveryY.Size = UDim2.new(0, 60, 0, 25)
+deliveryY.Position = UDim2.new(0, 185, 0, 75)
+deliveryY.PlaceholderText = "Y"
+deliveryY.Text = "3"
+
+local deliveryZ = Instance.new("TextBox")
+deliveryZ.Parent = farmSettings
+deliveryZ.Size = UDim2.new(0, 60, 0, 25)
+deliveryZ.Position = UDim2.new(0, 250, 0, 75)
+deliveryZ.PlaceholderText = "Z"
+deliveryZ.Text = "0"
+
+-- Радиус поиска
+local radiusLabel = Instance.new("TextLabel")
+radiusLabel.Parent = farmSettings
+radiusLabel.Size = UDim2.new(0, 100, 0, 25)
+radiusLabel.Position = UDim2.new(0, 10, 0, 110)
+radiusLabel.Text = "Радиус поиска:"
+radiusLabel.BackgroundTransparency = 1
+
+local radiusInput = Instance.new("TextBox")
+radiusInput.Parent = farmSettings
+radiusInput.Size = UDim2.new(0, 80, 0, 25)
+radiusInput.Position = UDim2.new(0, 120, 0, 110)
+radiusInput.PlaceholderText = "20"
+radiusInput.Text = "20"
+
+-- Кнопка Старт/Стоп
+local farmStatus = Instance.new("TextLabel")
+farmStatus.Parent = farmSettings
+farmStatus.Size = UDim2.new(1, -20, 0, 30)
+farmStatus.Position = UDim2.new(0, 10, 0, 150)
+farmStatus.Text = "⏹ Остановлен"
+farmStatus.BackgroundColor3 = Color3.fromRGB(60, 60, 70)
+
+local farmToggle = Instance.new("TextButton")
+farmToggle.Parent = farmSettings
+farmToggle.Size = UDim2.new(0, 150, 0, 40)
+farmToggle.Position = UDim2.new(0.5, -75, 0, 190)
+farmToggle.Text = "▶ СТАРТ"
+farmToggle.BackgroundColor3 = Color3.fromRGB(0, 150, 100)
+
+-- ========== ПАНЕЛЬ КООРДИНАТ ==========
+local coordPanel = Instance.new("Frame")
+coordPanel.Parent = mainFrame
+coordPanel.Size = UDim2.new(1, -20, 1, -95)
+coordPanel.Position = UDim2.new(0, 10, 0, 80)
+coordPanel.BackgroundColor3 = Color3.fromRGB(30, 30, 40)
+coordPanel.Visible = false
+
+-- Твои координаты
+local myCoordBox = Instance.new("TextLabel")
+myCoordBox.Parent = coordPanel
+myCoordBox.Size = UDim2.new(1, -20, 0, 60)
+myCoordBox.Position = UDim2.new(0, 10, 0, 10)
+myCoordBox.Text = "📍 Твои координаты:\nX: 0.0  Y: 0.0  Z: 0.0"
+myCoordBox.TextColor3 = Color3.fromRGB(100, 200, 255)
+myCoordBox.BackgroundColor3 = Color3.fromRGB(40, 40, 50)
+
+-- Координаты объекта под прицелом
+local targetCoordBox = Instance.new("TextLabel")
+targetCoordBox.Parent = coordPanel
+targetCoordBox.Size = UDim2.new(1, -20, 0, 80)
+targetCoordBox.Position = UDim2.new(0, 10, 0, 80)
+targetCoordBox.Text = "🎯 Объект под прицелом:\nНет цели"
+targetCoordBox.TextColor3 = Color3.fromRGB(255, 200, 100)
+targetCoordBox.BackgroundColor3 = Color3.fromRGB(40, 40, 50)
+
+-- Кнопка записи координат
+local copyBtn = Instance.new("TextButton")
+copyBtn.Parent = coordPanel
+copyBtn.Size = UDim2.new(0, 200, 0, 40)
+copyBtn.Position = UDim2.new(0.5, -100, 0, 180)
+copyBtn.Text = "📋 КОПИРОВАТЬ КООРДИНАТЫ"
+copyBtn.BackgroundColor3 = Color3.fromRGB(0, 150, 200)
+
+-- Инструкция
+local coordHint = Instance.new("TextLabel")
+coordHint.Parent = coordPanel
+coordHint.Size = UDim2.new(1, -20, 0, 60)
+coordHint.Position = UDim2.new(0, 10, 0, 240)
+coordHint.Text = "💡 Наведись на объект (груз, точку сдачи) и нажми ЛКМ на телефоне или ПК.\nКоординаты появятся выше."
+coordHint.TextSize = 12
+coordHint.TextColor3 = Color3.fromRGB(150, 150, 150)
+coordHint.BackgroundTransparency = 1
+
+-- ========== ПЕРЕМЕННЫЕ ==========
+local isFarming = false
+local farmLoop = nil
+local lastTargetCoords = nil
+
+-- ========== ФУНКЦИИ ДЛЯ ФАРМА ==========
+
+local function pressAndHold(holdTime)
+    holdTime = holdTime or 0.6
+    local UIS = game:GetService("UserInputService")
+    
+    if UIS.TouchEnabled then
+        local vu = game:GetService("VirtualUser")
+        if vu then
+            vu:CaptureController()
+            vu:ClickButton1(Vector2.new(0, 0), true)
+            task.wait(holdTime)
+            vu:ClickButton1(Vector2.new(0, 0), false)
+        else
+            UIS:SetKeyDown(Enum.KeyCode.E)
+            task.wait(holdTime)
+            UIS:SetKeyUp(Enum.KeyCode.E)
+        end
+    else
+        UIS:SetKeyDown(Enum.KeyCode.E)
+        task.wait(holdTime)
+        UIS:SetKeyUp(Enum.KeyCode.E)
+    end
+end
+
+local function findNearestCargo(cargoName, radius, hrp)
+    local nearest = nil
+    local minDist = radius
+    
+    for _, obj in ipairs(workspace:GetDescendants()) do
+        if obj.Name == cargoName and obj:IsA("BasePart") then
+            local weld = obj:FindFirstChild("WeldConstraint")
+            if not weld then
+                local dist = (hrp.Position - obj.Position).Magnitude
+                if dist < minDist then
+                    minDist = dist
+                    nearest = obj
+                end
+            end
+        end
+    end
+    return nearest
+end
+
+local function isCarryingCargo(cargoName, char, hrp)
+    for _, obj in ipairs(char:GetDescendants()) do
+        if obj.Name == cargoName and obj:IsA("BasePart") then
+            local weld = obj:FindFirstChild("WeldConstraint")
+            if weld and weld.Part1 == hrp then
+                return true
+            end
+        end
+    end
+    return false
+end
+
+local function startFarming()
+    if isFarming then return end
+    
+    local cargoName = cargoInput.Text
+    local radius = tonumber(radiusInput.Text) or 20
+    local deliveryPos = Vector3.new(
+        tonumber(deliveryX.Text) or 0,
+        tonumber(deliveryY.Text) or 3,
+        tonumber(deliveryZ.Text) or 0
+    )
+    
+    if not cargoName or cargoName == "" then
+        farmStatus.Text = "❌ Укажи имя груза!"
+        return
+    end
+    
+    isFarming = true
+    farmToggle.Text = "⏹ СТОП"
+    farmToggle.BackgroundColor3 = Color3.fromRGB(200, 50, 50)
+    farmStatus.Text = "🔄 Фарм запущен..."
+    
+    farmLoop = task.spawn(function()
+        while isFarming do
+            local char = player.Character
+            if not char then task.wait(1); break end
+            local hrp = char:FindFirstChild("HumanoidRootPart")
+            if not hrp then task.wait(1); break end
+            
+            if not isCarryingCargo(cargoName, char, hrp) then
+                local cargo = findNearestCargo(cargoName, radius, hrp)
+                if cargo then
+                    hrp.CFrame = CFrame.new(cargo.Position + Vector3.new(0, 2, 0))
+                    task.wait(0.2)
+                    pressAndHold(0.6)
+                    farmStatus.Text = "📦 Взял груз"
+                else
+                    farmStatus.Text = "🔍 Ищу груз..."
+                end
+            else
+                hrp.CFrame = CFrame.new(deliveryPos)
+                farmStatus.Text = "✨ Телепорт на сдачу"
+            end
+            
+            task.wait(1)
+        end
+    end)
+end
+
+local function stopFarming()
+    if not isFarming then return end
+    isFarming = false
+    if farmLoop then task.cancel(farmLoop) end
+    farmToggle.Text = "▶ СТАРТ"
+    farmToggle.BackgroundColor3 = Color3.fromRGB(0, 150, 100)
+    farmStatus.Text = "⏹ Остановлен"
+end
+
+-- ========== ФУНКЦИИ ДЛЯ КООРДИНАТ ==========
+
+local function updateMyCoordinates()
+    task.spawn(function()
+        while true do
+            local char = player.Character
+            if char and char:FindFirstChild("HumanoidRootPart") then
+                local pos = char.HumanoidRootPart.Position
+                myCoordBox.Text = string.format("📍 Твои координаты:\nX: %.1f   Y: %.1f   Z: %.1f", pos.X, pos.Y, pos.Z)
+            end
+            task.wait(0.5)
+        end
+    end)
+end
+
+local function setupTargetDetector()
+    local mouse = player:GetMouse()
+    mouse.Button1Down:Connect(function()
+        local target = mouse.Target
+        if target then
+            local pos = target.Position
+            lastTargetCoords = pos
+            targetCoordBox.Text = string.format(
+                "🎯 Объект: %s\nКоординаты:\nX: %.1f  Y: %.1f  Z: %.1f\n\n💡 Нажми 'Копировать' для использования в фарме",
+                target.Name, pos.X, pos.Y, pos.Z
+            )
+        else
+            targetCoordBox.Text = "🎯 Объект под прицелом:\nНет цели (наведись и нажми ЛКМ)"
+        end
+    end)
+end
+
+copyBtn.MouseButton1Click:Connect(function()
+    if lastTargetCoords then
+        deliveryX.Text = string.format("%.1f", lastTargetCoords.X)
+        deliveryY.Text = string.format("%.1f", lastTargetCoords.Y)
+        deliveryZ.Text = string.format("%.1f", lastTargetCoords.Z)
+        targetCoordBox.Text = targetCoordBox.Text .. "\n\n✅ Координаты скопированы во вкладку 'Фарм'!"
+    else
+        targetCoordBox.Text = "🎯 Объект под прицелом:\nСначала наведись на объект и нажми ЛКМ!"
+    end
+end)
+
+-- ========== ПЕРЕКЛЮЧЕНИЕ ВКЛАДОК ==========
+farmTab.MouseButton1Click:Connect(function()
+    farmPanel.Visible = true
+    coordPanel.Visible = false
+    farmTab.BackgroundColor3 = Color3.fromRGB(0, 150, 200)
+    coordTab.BackgroundColor3 = Color3.fromRGB(60, 60, 70)
+end)
+
+coordTab.MouseButton1Click:Connect(function()
+    farmPanel.Visible = false
+    coordPanel.Visible = true
+    farmTab.BackgroundColor3 = Color3.fromRGB(60, 60, 70)
+    coordTab.BackgroundColor3 = Color3.fromRGB(0, 150, 200)
+end)
+
+-- ========== УПРАВЛЕНИЕ ОКНОМ ==========
+closeBtn.MouseButton1Click:Connect(function()
+    stopFarming()
+    screenGui:Destroy()
+end)
+
+minimizeBtn.MouseButton1Click:Connect(function()
+    mainFrame.Visible = false
+    local miniBtn = Instance.new("TextButton")
+    miniBtn.Parent = screenGui
+    miniBtn.Size = UDim2.new(0, 50, 0, 50)
+    miniBtn.Position = UDim2.new(0, 20, 0, 100)
+    miniBtn.Text = "📦"
+    miniBtn.BackgroundColor3 = Color3.fromRGB(0, 150, 200)
+    miniBtn.MouseButton1Click:Connect(function()
+        mainFrame.Visible = true
+        miniBtn:Destroy()
+    end)
+end)
+
+-- Перетаскивание окна
+local dragging = false
+local dragStart, startPos
+titleBar.InputBegan:Connect(function(input)
+    if input.UserInputType == Enum.UserInputType.MouseButton1 then
+        dragging = true
+        dragStart = input.Position
+        startPos = mainFrame.Position
+    end
+end)
+titleBar.InputEnded:Connect(function(input)
+    if input.UserInputType == Enum.UserInputType.MouseButton1 then
+        dragging = false
+    end
+end)
+game:GetService("UserInputService").InputChanged:Connect(function(input)
+    if dragging and input.UserInputType == Enum.UserInputType.MouseMovement then
+        local delta = input.Position - dragStart
+        mainFrame.Position = UDim2.new(startPos.X.Scale, startPos.X.Offset + delta.X, startPos.Y.Scale, startPos.Y.Offset + delta.Y)
+    end
+end)
+
+-- ========== ЗАПУСК ==========
+farmToggle.MouseButton1Click:Connect(function()
+    if isFarming then stopFarming() else startFarming() end
+end)
+
+updateMyCoordinates()
+setupTargetDetector()
+farmTab.Text = "⚙️ ФАРМ"
+coordTab.Text = "📍 КООРДИНАТЫ"
+
+print("✅ GUI загружен! Используй вкладки для фарма и определения координат.")
